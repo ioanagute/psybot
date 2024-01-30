@@ -1,0 +1,4 @@
+
+Bună ziua, {{ user.username }}, 
+ 
+Mergeți la http://{{site}}/accounts/activate/{{activation_key}}/ petru a vă activa contul.

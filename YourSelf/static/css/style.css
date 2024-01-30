@@ -1,0 +1,184 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(rgb(84 77 77 / 75%), rgb(13 79 93 / 75%));
+    background-size: cover;
+    background-position: center;
+}
+
+.navbar {
+    padding: 30px;
+    display: flex;
+    height: 10vh;
+    color: #fff;
+}
+
+.navbar ul {
+    display: flex;
+    justify-content: space-between;
+    margin-left: auto;
+}
+
+.navbar ul li {
+    list-style: none;
+    display: inline-block;
+    margin: 0 12px;
+    position: relative;
+}
+
+.navbar ul li a {
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.navbar ul li::after {
+    content: '';
+    height: 3px;
+    width: 0%;
+    background: #610096;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    transition: 0.5s;
+}
+
+.navbar ul li:hover::after {
+    width: 100%;
+}
+
+.content {
+    height: 90vh;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+.content h2 {
+    margin-bottom: 10px;
+}
+
+.message-list {
+    width: 50%;
+    height: 70vh;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+.message-list::-webkit-scrollbar {
+    display: none;
+}
+
+.message {
+    border-radius: 8px;
+    margin: 10px 0;
+    padding: 10px;
+    background: linear-gradient(rgb(204 204 204 / 40%), rgb(107 174 188 / 40%));
+}
+
+.message-sender {
+    display: flex;
+    justify-content: space-between;
+}
+
+.message.received .message-content {
+    white-space: pre-line;
+}
+
+.loading {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 100%;
+    margin: 10px 0;
+}
+  
+.loading__dot {
+    animation: dot ease-in-out 1s infinite;
+    background-color: rgb(186, 186, 186);
+    display: inline-block;
+    height: 10px;
+    margin: 5px;
+    width: 10px;
+    border-radius: 5px;
+}
+  
+.loading__dot:nth-of-type(2) {
+    animation-delay: 0.2s;
+}
+  
+.loading__dot:nth-of-type(3) {
+    animation-delay: 0.3s;
+}
+  
+@keyframes dot {
+    0% { background-color: #3981ae; transform: scale(1); }
+    50% { background-color: #fff; transform: scale(1.3); }
+    100% { background-color: #3981ae; transform: scale(1); }
+}
+
+.message-form {
+    margin: 10px 0;
+}
+
+.input-area {
+    height: 200px;
+}
+
+.input-group {
+    align-items: center;
+}
+
+#text-input.psybot {
+    width: 500px;
+    height: 30px;
+}
+
+.input-group.journal {
+    width: 700px;
+}
+
+.input-group.journal textarea {
+    width: 160px;
+}
+
+.btn-main {
+    color: #fff;
+    background-color: #44ada6;
+    border-color: #44ada6;
+}
+
+.btn-main:hover {
+    color: #fff;
+    background-color: #8948ac;
+    border-color: #8948ac;
+}
+
+.home-container {
+    width: 50%;
+}
+
+#search-bar {
+    display: flex;
+}
+
+.margin-top {
+    margin-top: 8rem;
+}
+
+.tags {
+    display: flex;
+}
+
+.bubble {
+    padding: 4px;
+    border-radius: 14px;
+    margin-right: 4px;
+    background-color: #78ceb7;
+}

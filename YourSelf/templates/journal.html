@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+      
+  <h2>Feel free to write what's on your mind</h2>
+      
+  <div id="search-bar">
+    <input type="text" id="search-input" class="form-control" placeholder="Search text...">
+    <input type="date" id="date-input" class="form-control ms-2">
+    <select id="tag-input" class="form-select ms-2">
+      <option selected>Select tag</option>
+      <option>Happy</option>
+      <option>Excited</option>
+      <option>Angry</option>
+      <option>Anxious</option>
+      <option>Scared</option>
+      <option>Sad</option>
+      <option>Ioana</option>
+    </select>
+    <button id="search-button" class="btn btn-main ms-2">Search</button>
+  </div>
+
+  <div class="message-list">
+
+    {% for entry in entries %}
+
+    <div id="entry-{{entry.id}}" class="message sent">
+      <div class="message-sender">
+        <b>{{entry.title}}</b>
+        <div>
+          <span>{{entry.created_at}}</span>
+          <button class="delete-button btn btn-main" data-entry-id="{{entry.id}}">Delete</button>
+        </div>
+      </div>
+      <div class="tags">
+        {{entry.tags}}
+      </div>
+      <div class="message-content">
+        {{entry.text}}
+      </div>
+    </div>
+
+    {% endfor %}
+      
+  </div>
+
+  <div class="loading">
+    <span class="loading__dot"></span>
+    <span class="loading__dot"></span>
+    <span class="loading__dot"></span>
+  </div>
+
+  <form class="message-form">
+    {% csrf_token %}
+    <div class="input-group journal">
+        <input type="text" class="form-control" id="title-input" placeholder="Type your title...">
+      
+        <select id="tags-select" class="form-select ms-2" size="3" multiple>
+            <option>Happy</option>
+            <option>Excited</option>
+            <option>Angry</option>
+            <option>Anxious</option>
+            <option>Scared</option>
+            <option>Sad</option>
+            <option>Ioana</option>
+        </select>
+
+        <textarea class="form-control ms-2" id="text-input" placeholder="Type your thoughts..."></textarea>
+
+      <div class="input-group-append ms-2">
+        <button type="submit" class="btn btn-main btn-send">Save</button>
+      </div>
+    </div>
+  </form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const messagesList = document.querySelector('.message-list');
+    const messageForm = document.querySelector('.message-form');
+    const searchButton = document.getElementById('search-button');
+
+    searchButton.addEventListener('click', (event) => {
+      const searchText = document.getElementById('search-input').value.trim();
+      const searchDate = document.getElementById('date-input').value;
+      const searchTag = document.getElementById('tag-input').value;
+
+      if (searchText.length === 0 && searchDate.length === 0 && searchTag === "Select tag") {
+        return;
+      }
+
+      window.location.href=`/journal/?search=${searchText}&date=${searchDate}&tag=${searchTag !== "Select tag" ? searchTag : ""}`;
+    });
+
+    const titleInput = document.getElementById('title-input');
+    const textInput = document.getElementById('text-input');
+    const tagsSelect = document.getElementById('tags-select');
+
+    messageForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const title = titleInput.value.trim();
+      const text = textInput.value.trim();
+      const tags = Array.from(tagsSelect.selectedOptions).map(({ text }) => text);
+
+      if (title.length === 0 || text.length === 0) {
+        return;
+      }
+
+      const form = document.querySelector('.message-form');
+      const loading = document.querySelector('.loading');
+
+      form.style.display = 'none';
+      loading.style.display = 'flex';
+
+      fetch('', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          'csrfmiddlewaretoken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          'title': title,
+          'text': text,
+          'tags': tags.toString()
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          const entry = document.createElement('div');
+          entry.classList.add('message', 'sent');
+          entry.id = `entry-${data.id}`;
+          entry.innerHTML = `
+              <div class="message-sender">
+                <b>${title}</b>
+                <div>
+                  <span>${data.created_at}</span>
+                  <button class="delete-button btn btn-main" data-entry-id="${data.id}">Delete</button>
+                </div>
+              </div>
+              <div class="tags">
+                ${tags.map((tag) => "<div class='bubble'>" + tag + "</div>").join('')}
+              </div>
+              <div class="message-content">
+                ${text}
+              </div>
+            `;
+          messagesList.appendChild(entry);
+
+          const newDeleteButton = document.querySelector(`#entry-${data.id} button`);
+          addDeleteAction(newDeleteButton);
+
+          titleInput.value = '';
+          textInput.value = '';
+          tagsSelect.value = '';
+        
+          stopLoading();
+        }).catch(stopLoading);
+
+        function stopLoading() {
+          loading.style.display = 'none';
+          form.style.display = 'block';
+        }
+    });
+
+    function getSelectValues(select) {
+      let result = [];
+      let options = select && select.options;
+      let currentOption;
+
+      for (let i = 0; i <= options.length; i++) {
+        currentOption = options[i];
+
+        if (currentOption.selected) {
+          result.push(currentOption.text);
+        }
+      }
+
+      return result;
+    }
+
+    const deleteButtons = document.querySelectorAll('.delete-button');
+    
+    deleteButtons.forEach(addDeleteAction);
+
+    function addDeleteAction(button) {
+      button.addEventListener('click', function() {
+        const entryId = this.getAttribute('data-entry-id');
+        
+        fetch('/delete-entry/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            'csrfmiddlewaretoken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'entry_id': entryId
+          })
+        })
+        .then(response => {
+          if (response.ok) {
+            const entry = document.getElementById(`entry-${entryId}`);
+            entry.parentNode.removeChild(entry);
+          } else {
+            console.error('Request failed with status: ', response.status);
+          }
+        })
+        .catch(error => {
+          console.error('Request failed: ', error);
+        });
+      });
+    }
+
+    const tags = document.querySelectorAll('.tags');
+
+    tags.forEach(function(tags) {
+      tags.innerHTML = tags.innerHTML.split(',').map((tag) => "<div class='bubble'>" + tag + "</div>").join('');
+    });
+  });
+</script>
+
+{% endblock %}
